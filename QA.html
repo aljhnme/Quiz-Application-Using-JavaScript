@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="styleQA.css">
+</head>
+
+<body>
+    <div class="widget-wrap">
+        <div id="quizWrap">
+            <div id="quizQn"></div>
+            <div id="quizAns">
+            </div>
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    
+const aqElement = document.getElementById("quizAns");
+const quizQn = document.getElementById("quizQn")
+
+var AnswerTrue = 0;
+var isListenerEnabled = true;
+const QuestionsAndAnswersCompetitionDataJSON = localStorage.getItem('myData');
+const competitionDataArray = JSON.parse(QuestionsAndAnswersCompetitionDataJSON);
+
+ShowCompetitionData(1);
+function ShowCompetitionData(Roundkey) {
+
+    Roundkey = "Q" + Roundkey;
+    THEqustion = competitionDataArray[Roundkey].shift();
+    quizQn.innerText = THEqustion;
+    aqElement.innerText = '';
+
+    for(var i = 0; i < 4; i++) {
+        aqElement.innerHTML += '<input type="radio" id="ANSq' + (i + 1) + '" value="' + competitionDataArray[Roundkey][i] + '">' + '<label for="ANSq' + (i + 1) + '">' + competitionDataArray[Roundkey][i] + '</label>';
+    }
+
+    AnswerTrue = competitionDataArray[Roundkey].pop();
+    isListenerEnabled = true;
+
+    const radios = document.querySelectorAll('input[ type="radio" ]');
+    radios.forEach(radio => radio.addEventListener("click", ChooseTheAnswer));
+}
+
+var CurrentRound = 1;
+
+function ChooseTheAnswer() {
+
+    if(isListenerEnabled == true) {
+
+        isListenerEnabled = false;
+        
+        Roundkey = "Q" + CurrentRound;
+        const TheCorrectAnswer = competitionDataArray[Roundkey][AnswerTrue - 1];
+        const answerID = event.target.id;
+        const TheChosenAnswer = event.target.value
+
+        const theCurrentSelectedAnswer = document.querySelector('label[ for="' + answerID + '" ]');
+
+        CurrentRound++;
+
+        if(TheChosenAnswer != TheCorrectAnswer) {
+            theCurrentSelectedAnswer.style.backgroundColor = "red";
+        } else {
+            theCurrentSelectedAnswer.style.borderColor = "blue";
+            theCurrentSelectedAnswer.style.borderWidth = 3 + "px";
+        }
+
+        var IterationloopNumber = 0;
+
+        var SetInterval = setInterval(function() {
+
+            IterationloopNumber++;
+            if(IterationloopNumber < 10) {
+
+                IdCorrectAnswer = answerID.slice(0, -1) + (AnswerTrue);
+                const correctAnswerElement = document.querySelector('label[ for="' + IdCorrectAnswer + '" ]');
+                correctAnswerElement.style.backgroundColor = correctAnswerElement.style.backgroundColor === "white" ? "green" : "white";
+
+            } else {
+
+                clearInterval(SetInterval);
+                var CheckIfTheQuestionsAreFinished = competitionDataArray['Q' + CurrentRound] !== undefined;
+
+                if(CheckIfTheQuestionsAreFinished == false) {
+                    aqElement.innerHTML = '';
+                    quizQn.innerText = "The questions are over";
+                    return;
+                }
+
+                ShowCompetitionData(CurrentRound);
+            }
+        }, 200);
+    }
+}
+</script>
+
+</html>

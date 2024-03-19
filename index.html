@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="StyleForm.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>Round <strong id="TQ1">1 </strong></h1>
+        <select id="myRoundS">
+            <option value="1" selected>Number of rounds - Round 1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+        </select>
+        <p style="color:red;" id="messageAlert"></p>
+        <form>
+            <br>
+            <div style="display: flex;">
+                <label for="question">Question:</label>
+                <input type="text" id="question" name="Qanswer" required>
+            </div>
+            <div style="display: flex;">
+                <label for="answer1">Answer 1:</label>
+                <input type="text" id="answer1" name="Qanswer" required>
+                <input type="radio" name="selectCanswer" value="1">
+            </div>
+            <div style="display: flex;">
+                <label for="answer2">Answer 2:</label>
+                <input type="text" id="answer2" name="Qanswer" required>
+                <input type="radio" name="selectCanswer" value="2">
+            </div>
+            <div style="display: flex;">
+                <label for="answer3">Answer 3:</label>
+                <input type="text" id="answer3" name="Qanswer" required>
+                <input type="radio" name="selectCanswer" value="3">
+            </div>
+            <div style="display: flex;">
+                <label for="answer4">Answer 4:</label>
+                <input type="text" id="answer4" name="Qanswer" required>
+                <input type="radio" name="selectCanswer" value="4">
+            </div>
+            <p style="color:red;" id="messageQA"></p>
+            <button id="submit" type="submit">Next</button>
+        </form>
+    </div>
+</body>
+<script type="text/javascript">
+
+const inputQuiz = document.querySelectorAll('input[name="Qanswer"]');
+const htmlMeassge = document.getElementById('messageQA');
+
+var competitionData = {};
+var CurrentRound = 1;
+var SpecifiedRound = 1;
+
+document.getElementById("submit").addEventListener("click", function(event) {
+    event.preventDefault();
+    
+    var Check_for_empty_field = Array.from(inputQuiz).some(function(input) {
+        return input.value.trim() === ''
+    });
+
+    if(Check_for_empty_field === false) {
+
+        const radioButtons = document.querySelector('input[type="radio"]:checked');
+        if(radioButtons) {
+
+            for(var i = 1; i < 6; i++) {
+
+                ValueToArray = radioButtons.value;
+
+                if(i != 5) {
+                    var inputQu = document.getElementById("answer" + i);
+                    ValueToArray = inputQu.value;
+                }
+
+                competitionData['Q' + CurrentRound].push(ValueToArray);
+                inputQu.value = "";
+            }
+
+            const VInputQuestion = document.getElementById("question").value;
+            competitionData['Q' + CurrentRound].unshift(VInputQuestion);
+
+            if(SpecifiedRound == CurrentRound) {
+
+                const MYDataJson = JSON.stringify(competitionData);
+                localStorage.setItem("myData", MYDataJson);
+                window.location.href = "QA.html";
+                return;
+            }
+
+            CurrentRound++;
+            document.getElementById("TQ1").textContent = CurrentRound;
+            htmlMeassge.innerText = "";
+
+        } else {
+            htmlMeassge.innerText = "Please choose the correct answer";
+        }
+    } else {
+        htmlMeassge.innerText = "Please fill out all fields";
+    }
+});
+
+InsertRoundsIntoTheArray();
+
+function InsertRoundsIntoTheArray() {
+
+    var The_number_of_specific_rounds = (typeof this.value !== 'undefined') ? this.value : 1;
+
+    if(CurrentRound == 1) {
+        SpecifiedRound = The_number_of_specific_rounds;
+        for(var i = 0; i < The_number_of_specific_rounds; i++) {
+            RoundDataKey = 'Q' + (i + 1);
+            competitionData[RoundDataKey] = [];
+        }
+    } else {
+        document.getElementById("messageAlert").innerText = "You cannot now specify the number of rounds";
+    }
+}
+
+const specificRoundElements = document.getElementById("myRoundS");
+specificRoundElements.addEventListener('change', InsertRoundsIntoTheArray);
+
+</script>
+
+</html>
